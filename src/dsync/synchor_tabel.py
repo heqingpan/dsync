@@ -3,7 +3,6 @@ from typeinfo import TypeInfo
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import sqlalchemy
-import datetime
 
 
 
@@ -29,15 +28,15 @@ class Common(object):
                 ,stable.get_name()
                 ,swhere or ""
                 ,cls._get_multi_fields(skeys))
-        print "---- source ----"
         sdata=sconn.execute(ssql).fetchall()
+        print "---- source len ----"
         print len(sdata)
         # get target data
         tsql = sqlfmt.format(cls._get_multi_fields(tfields)
                 ,ttable.get_name()
                 ,twhere or ""
                 ,cls._get_multi_fields(tkeys))
-        print "---- target ----"
+        print "---- target len ----"
         tdata=tconn.execute(tsql).fetchall()
         print len(tdata)
         # after order
@@ -94,7 +93,6 @@ class Common(object):
                     if update_index >= c_count:
                         update_index-=c_count
                         tconn.execute(update_sql,update_params_list)
-                        tconn.commit()
                         update_params_list=[]
                 si+=1
                 ti+=1
@@ -107,7 +105,6 @@ class Common(object):
                 if insert_index >= c_count:
                     insert_index-=c_count
                     tconn.execute(insert_sql,insert_params_list)
-                    tconn.commit()
                     insert_params_list=[]
                 si+=1
             else:
@@ -119,7 +116,6 @@ class Common(object):
                 if delete_index >= c_count:
                     delete_index-=c_count
                     tconn.execute(delete_sql,delete_params_list)
-                    tconn.commit()
                     delete_params_list=[]
                 ti+=1
         while si < sl:
@@ -133,7 +129,6 @@ class Common(object):
             if insert_index >= c_count:
                 insert_index-=c_count
                 tconn.execute(insert_sql,insert_params_list)
-                tconn.commit()
                 insert_params_list=[]
             si+=1
         while ti < tl:
@@ -147,7 +142,6 @@ class Common(object):
             if delete_index >= c_count:
                 delete_index-=c_count
                 tconn.execute(delete_sql,delete_params_list)
-                tconn.commit()
                 delete_params_list=[]
             ti+=1
         if update_params_list:
@@ -156,7 +150,6 @@ class Common(object):
             tconn.execute(insert_sql,insert_params_list)
         if delete_params_list:
             tconn.execute(delete_sql,delete_params_list)
-        tconn.commit()
 
             
     @classmethod
@@ -278,51 +271,4 @@ class Common(object):
     @classmethod
     def _get_multi_fields(cls,fields):
         return ",".join(map(lambda f:f.get_name(),fields))
-
-    @classmethod
-    def build_test_00(cls):
-        sconnstr=r"mysql+mysqldb://admin:admin@127.0.0.1:3306/bigagio?charset=utf8"
-        tconnstr=r"mysql+mysqldb://admin:admin@127.0.0.1:3306/test01?charset=utf8"
-        sconn= create_engine(sconnstr)
-        tconn= create_engine(tconnstr)
-        #sengine = create_engine(sconnstr)
-        #tengine = create_engine(tconnstr)
-        #s_Session=sessionmaker()
-        #s_Session.configure(bind=sengine)
-        #sconn=s_Session()
-        #t_Session=sessionmaker()
-        #t_Session.configure(bind=tengine)
-        #tconn=t_Session()
-
-        stable=ttable=TypeInfo("TB_SYSCONFIG")
-        skeys=tkeys=[TypeInfo("ID","str")]
-        swhere=twhere=None
-        sfields=tfields=[
-                TypeInfo("ID","str"),
-                TypeInfo("SYSKEY","str"),
-                TypeInfo("NAME","str"),
-                TypeInfo("VALUE","str"),
-            ]
-
-        sconfig={
-            "conn":sconn,
-            "table":stable,
-            "keys":skeys,
-            "fields":sfields,
-            "where":swhere,
-            }
-        tconfig={
-            "conn":tconn,
-            "table":ttable,
-            "keys":tkeys,
-            "fields":tfields,
-            "where":twhere,
-            }
-        return sconfig,tconfig
-
-    @classmethod
-    def test_00(cls):
-        sconfig,tconfig = cls.build_test_00()
-        cls.sync_table(sconfig,tconfig)
-        
 
