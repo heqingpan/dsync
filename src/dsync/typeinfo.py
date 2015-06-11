@@ -13,11 +13,11 @@ class TypeInfo(object):
         return self.ftype
 
     @classmethod
-    def _get_base_type(cls,stype,ttype):
+    def get_base_type(cls,stype,ttype):
         return ttype
 
     @classmethod
-    def _get_value(cls,value,form_type,to_type):
+    def get_value(cls,value,form_type,to_type):
         if value is None or form_type==to_type:
             return value
         r=value
@@ -39,15 +39,15 @@ class TypeInfo(object):
         return r
 
     @classmethod
-    def _get_middle_value(cls,svalue,stype,tvalue,ttype,get_value=None):
-        base_type=cls._get_base_type(stype,ttype)
-        get_value= get_value or cls._get_value
+    def get_middle_value(cls,svalue,stype,tvalue,ttype,get_value=None):
+        base_type=cls.get_base_type(stype,ttype)
+        get_value= get_value or cls.get_value
         return (get_value(svalue,stype,base_type)
                 ,get_value(tvalue,ttype,base_type))
 
     @classmethod
-    def _compare_value(cls,svalue,stype,tvalue,ttype,get_value=None):
-        sv,tv=cls._get_middle_value(svalue,stype,tvalue,ttype,get_value=get_value)
+    def compare_value(cls,svalue,stype,tvalue,ttype,get_value=None):
+        sv,tv=cls.get_middle_value(svalue,stype,tvalue,ttype,get_value=get_value)
         if sv==tv:
             return 0
         if sv < tv:

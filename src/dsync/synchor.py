@@ -67,7 +67,7 @@ class Core(object):
                 tkey=tkeys[i]
                 svalue=srow[skey.name]
                 tvalue=trow[tkey.name]
-                key_compare = TypeInfo._compare_value(svalue,skey.get_type()
+                key_compare = TypeInfo.compare_value(svalue,skey.get_type()
                         ,tvalue,tkey.get_type())
                 if key_compare != 0:
                     break
@@ -79,7 +79,7 @@ class Core(object):
                     tkey=tfields[i]
                     svalue=srow[skey.name]
                     tvalue=trow[tkey.name]
-                    compare_value = TypeInfo._compare_value(svalue,skey.get_type()
+                    compare_value = TypeInfo.compare_value(svalue,skey.get_type()
                             ,tvalue,tkey.get_type())
                     if compare_value != 0:
                         can_update=True
@@ -190,7 +190,7 @@ class Core(object):
             skey=sfields[i]
             tkey=tfields[i]
             svalue=srow[skey.name]
-            middle_value=TypeInfo._get_value(svalue,skey.get_type(),tkey.get_type())
+            middle_value=TypeInfo.get_value(svalue,skey.get_type(),tkey.get_type())
             pkey="pf{0}".format(i)
             params[pkey]=middle_value
             if type(update_sql) == type(None):
@@ -235,7 +235,7 @@ class Core(object):
             skey=sfields[i]
             tkey=tfields[i]
             svalue=srow[skey.name]
-            middle_value=TypeInfo._get_value(svalue,skey.get_type(),tkey.get_type())
+            middle_value=TypeInfo.get_value(svalue,skey.get_type(),tkey.get_type())
             pkey="pf{0}".format(i)
             params[pkey]=middle_value
             if type(insert_sql) == type(None):
