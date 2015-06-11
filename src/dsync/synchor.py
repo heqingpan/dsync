@@ -29,16 +29,12 @@ class Core(object):
                 ,swhere or ""
                 ,cls._get_multi_fields(skeys))
         sdata=sconn.execute(ssql).fetchall()
-        print "---- source len ----"
-        print len(sdata)
         # get target data
         tsql = sqlfmt.format(cls._get_multi_fields(tfields)
                 ,ttable.get_name()
                 ,twhere or ""
                 ,cls._get_multi_fields(tkeys))
-        print "---- target len ----"
         tdata=tconn.execute(tsql).fetchall()
-        print len(tdata)
         # after order
 
         si=0
@@ -57,6 +53,10 @@ class Core(object):
         update_index=0
         insert_index=0
         delete_index=0
+        update_count=0
+        insert_count=0
+        delete_count=0
+        equal_count=0
         while si < sl and ti < tl:
             srow = sdata[si]
             trow = tdata[ti]
@@ -90,10 +90,13 @@ class Core(object):
                             ,srow,trow,update_sql=update_sql)
                     update_params_list.append(params)
                     update_index+=1
+                    update_count+=1
                     if update_index >= c_count:
                         update_index-=c_count
                         tconn.execute(update_sql,update_params_list)
                         update_params_list=[]
+                else:
+                    equal_count+=1
                 si+=1
                 ti+=1
             elif key_compare < 0:
@@ -102,6 +105,7 @@ class Core(object):
                         ,srow,trow,insert_sql=insert_sql)
                 insert_params_list.append(params)
                 insert_index+=1
+                insert_count+=1
                 if insert_index >= c_count:
                     insert_index-=c_count
                     tconn.execute(insert_sql,insert_params_list)
@@ -113,6 +117,7 @@ class Core(object):
                         ,srow,trow,delete_sql=delete_sql)
                 delete_params_list.append(params)
                 delete_index+=1
+                delete_count+=1
                 if delete_index >= c_count:
                     delete_index-=c_count
                     tconn.execute(delete_sql,delete_params_list)
@@ -126,6 +131,7 @@ class Core(object):
                     ,srow,trow,insert_sql=insert_sql)
             insert_params_list.append(params)
             insert_index+=1
+            insert_count+=1
             if insert_index >= c_count:
                 insert_index-=c_count
                 tconn.execute(insert_sql,insert_params_list)
@@ -139,6 +145,7 @@ class Core(object):
                     ,srow,trow,delete_sql=delete_sql)
             delete_params_list.append(params)
             delete_index+=1
+            delete_count+=1
             if delete_index >= c_count:
                 delete_index-=c_count
                 tconn.execute(delete_sql,delete_params_list)
@@ -150,6 +157,14 @@ class Core(object):
             tconn.execute(insert_sql,insert_params_list)
         if delete_params_list:
             tconn.execute(delete_sql,delete_params_list)
+        return {
+            "source_count":len(sdata),
+            "target_count":len(tdata),
+            "delete_count":delete_count,
+            "update_count":update_count,
+            "insert_count":insert_count,
+            "equal_count":equal_count,
+            }
 
             
     @classmethod

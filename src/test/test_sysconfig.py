@@ -55,7 +55,8 @@ def build_config():
 
 def test_00():
     sconfig,tconfig = build_config()
-    synchor.Core.sync_table(sconfig,tconfig)
+    r=synchor.Core.sync_table(sconfig,tconfig)
+    print r
 
 def main():
     test_00()
