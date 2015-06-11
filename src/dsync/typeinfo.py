@@ -39,8 +39,18 @@ class TypeInfo(object):
 
     @classmethod
     def _get_middle_value(cls,svalue,stype,tvalue,ttype,get_value=None):
-        base_type=TypeInfo._get_base_type(stype,ttype)
+        base_type=cls._get_base_type(stype,ttype)
         get_value= get_value or cls._get_value
         return (get_value(svalue,stype,base_type)
                 ,get_value(tvalue,ttype,base_type))
+
+    @classmethod
+    def _compare_value(cls,svalue,stype,tvalue,ttype,get_value=None):
+        sv,tv=cls._get_middle_value(svalue,stype,tvalue,ttype,get_value=get_value)
+        if sv==tv:
+            return 0
+        if sv < tv:
+            return -1
+        if sv > tv:
+            return 1
 

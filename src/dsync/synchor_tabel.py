@@ -68,7 +68,7 @@ class Common(object):
                 tkey=tkeys[i]
                 svalue=srow[skey.name]
                 tvalue=trow[tkey.name]
-                key_compare = cls._compare_value(svalue,skey.get_type()
+                key_compare = TypeInfo._compare_value(svalue,skey.get_type()
                         ,tvalue,tkey.get_type())
                 if key_compare != 0:
                     break
@@ -80,7 +80,7 @@ class Common(object):
                     tkey=tfields[i]
                     svalue=srow[skey.name]
                     tvalue=trow[tkey.name]
-                    compare_value = cls._compare_value(svalue,skey.get_type()
+                    compare_value = TypeInfo._compare_value(svalue,skey.get_type()
                             ,tvalue,tkey.get_type())
                     if compare_value != 0:
                         can_update=True
@@ -156,6 +156,7 @@ class Common(object):
             tconn.execute(insert_sql,insert_params_list)
         if delete_params_list:
             tconn.execute(delete_sql,delete_params_list)
+        tconn.commit()
 
             
     @classmethod
@@ -201,10 +202,6 @@ class Common(object):
             update_sql = update_sqlfmt.format(ttable.get_name()
                     ,setstr,wherestr)
             update_sql = sqlalchemy.text(update_sql)
-        print "----- update ------"
-        print update_sql
-        print params
-        # update
         return update_sql,params
 
     @classmethod
@@ -242,10 +239,6 @@ class Common(object):
             insert_sql = insert_sqlfmt.format(ttable.get_name()
                     ,namestr,valuestr)
             insert_sql = sqlalchemy.text(insert_sql)
-        print "----- insert ------"
-        print insert_sql
-        print params
-        # insert
         return insert_sql,params
 
     @classmethod
@@ -279,48 +272,12 @@ class Common(object):
             delete_sql = delete_sqlfmt.format(ttable.get_name()
                     ,wherestr)
             delete_sql = sqlalchemy.text(delete_sql)
-        print "----- delete ------"
-        print delete_sql
-        print params
-        # delete
         return delete_sql,params
 
 
     @classmethod
     def _get_multi_fields(cls,fields):
         return ",".join(map(lambda f:f.get_name(),fields))
-
-    @classmethod
-    def _compare_value(cls,svalue,stype,tvalue,ttype,get_value=None):
-        sv,tv=TypeInfo._get_middle_value(svalue,stype,tvalue,ttype,get_value=get_value)
-        if sv==tv:
-            return 0
-        if sv < tv:
-            return -1
-        if sv > tv:
-            return 1
-
-    @classmethod
-    def _get_value(cls,value,form_type,to_type):
-        if value is None or form_type==to_type:
-            return value
-        r=value
-        if to_type=="str" and form_type=="date":
-            try:
-                r=value.strftime("%Y-%m-%d %H:%M:%S")
-            except:
-                pass
-        elif to_type=="str":
-            r=str(value)
-        elif to_type=="num" and form_type=="date":
-            r=(value-datetime.datetime.fromtimestamp(0)).total_seconds()
-        elif to_type=="num":
-            r=float(value)
-        elif to_type=="date" and form_type=="num":
-            r=datetime.datetime.fromtimestamp(value)
-        elif to_type=="date" and form_type=="str":
-            r=datetime.datetime.strptime(value,"%Y-%m-%d %H:%M:%S")
-        return r
 
     @classmethod
     def build_test_00(cls):
