@@ -9,6 +9,16 @@ import sqlalchemy
 class Core(object):
     commit_count=500
     @classmethod
+    def sync(cls,group,is_echo=False):
+        rlist=[]
+        for item in group:
+            r=cls.sync_table(item[0],item[1])
+            if is_echo:
+                cls._print_result(r)
+            rlist.append(r)
+        return rlist
+
+    @classmethod
     def sync_table(cls,sconfig,tconfig):
         sconn = sconfig["conn"]
         stable = sconfig["table"]
@@ -158,13 +168,28 @@ class Core(object):
         if delete_params_list:
             tconn.execute(delete_sql,delete_params_list)
         return {
+            "source_table":stable.get_name(),
+            "target_table":ttable.get_name(),
             "source_count":len(sdata),
             "target_count":len(tdata),
+            "insert_count":insert_count,
             "delete_count":delete_count,
             "update_count":update_count,
-            "insert_count":insert_count,
             "equal_count":equal_count,
             }
+
+    @classmethod
+    def _print_result(cls,result):
+        print "------------"
+        print "source_table: %s"%result["source_table"]
+        print "target_table: %s"%result["target_table"]
+        print "------------"
+        print "source_count: %d"%result["source_count"]
+        print "target_count: %d"%result["target_count"]
+        print "delete_count: %d"%result["delete_count"]
+        print "update_count: %d"%result["update_count"]
+        print "insert_count: %d"%result["insert_count"]
+        print "equal_count: %d"%result["equal_count"]
 
             
     @classmethod

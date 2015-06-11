@@ -8,10 +8,12 @@ sys.path.append(_basedir)
 
 from dsync import synchor
 from dsync.typeinfo import TypeInfo
+from dsync.builder import Builder
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import sqlalchemy
+
+import simplejson as json
 
 def build_config():
     sconnstr=r"mysql+mysqldb://admin:admin@127.0.0.1:3306/bigagio?charset=utf8"
@@ -58,8 +60,53 @@ def test_00():
     r=synchor.Core.sync_table(sconfig,tconfig)
     print r
 
+def test_01():
+    configstr='''{
+    "sconn":{
+        "type":"mysql",
+        "host":"127.0.0.1",
+        "port":"3306",
+        "dbname":"bigagio",
+        "user":"admin",
+        "password":"admin",
+        "charset":"utf8"
+    },
+    "tconn":{
+        "type":"mysql",
+        "host":"127.0.0.1",
+        "port":"3306",
+        "dbname":"test01",
+        "user":"admin",
+        "password":"admin",
+        "charset":"utf8"
+    },
+    "group":[
+        [
+            {
+                "table":"TB_SYSCONFIG",
+                "keys":[["ID","str"]],
+                "fields":[["ID","str"],["SYSKEY","str"],["NAME","str"],["VALUE","str"]],
+                "where":""
+            },
+            {
+                "table":"TB_SYSCONFIG",
+                "keys":[["ID","str"]],
+                "fields":[["ID","str"],["SYSKEY","str"],["NAME","str"],["VALUE","str"]],
+                "where":""
+            }
+        ]
+    ]
+        
+}'''
+    config=json.loads(configstr)
+    br=Builder.build(config)
+    #print br
+    rlist=synchor.Core.sync(br,is_echo=True)
+    #print rlist
+
 def main():
-    test_00()
+    #test_00()
+    test_01()
 
 
 if __name__=="__main__":
