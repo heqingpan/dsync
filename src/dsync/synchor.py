@@ -9,7 +9,7 @@ import sqlalchemy
 class Core(object):
     commit_count=500
     @classmethod
-    def sync(cls,group,is_echo=False):
+    def sync_group(cls,group,is_echo=False):
         rlist=[]
         for item in group:
             r=cls.sync_table(item[0],item[1])
@@ -179,20 +179,6 @@ class Core(object):
             }
 
     @classmethod
-    def _print_result(cls,result):
-        print "------------"
-        print "source_table: %s"%result["source_table"]
-        print "target_table: %s"%result["target_table"]
-        print "------------"
-        print "source_count: %d"%result["source_count"]
-        print "target_count: %d"%result["target_count"]
-        print "delete_count: %d"%result["delete_count"]
-        print "update_count: %d"%result["update_count"]
-        print "insert_count: %d"%result["insert_count"]
-        print "equal_count: %d"%result["equal_count"]
-
-            
-    @classmethod
     def _take_update(cls,sconfig,tconfig,srow,trow,update_sql=None):
         sconn = sconfig["conn"]
         stable = sconfig["table"]
@@ -312,3 +298,16 @@ class Core(object):
     def _get_multi_fields(cls,fields):
         return ",".join(map(lambda f:f.get_name(),fields))
 
+    @classmethod
+    def _print_result(cls,result):
+        print "------------"
+        print "source_table: %s"%result["source_table"]
+        print "target_table: %s"%result["target_table"]
+        print "------------"
+        print "source_count: %d"%result["source_count"]
+        print "target_count: %d"%result["target_count"]
+        print "delete_count: %d"%result["delete_count"]
+        print "update_count: %d"%result["update_count"]
+        print "insert_count: %d"%result["insert_count"]
+        print "equal_count: %d"%result["equal_count"]
+            

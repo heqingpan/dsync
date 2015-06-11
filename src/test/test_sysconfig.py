@@ -101,7 +101,7 @@ def test_01():
     config=json.loads(configstr)
     br=Builder.build(config)
     #print br
-    rlist=synchor.Core.sync(br,is_echo=True)
+    rlist=synchor.Core.sync_group(br,is_echo=True)
     #print rlist
 
 def main():
