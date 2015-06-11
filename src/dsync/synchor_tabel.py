@@ -1,20 +1,14 @@
 # -*- coding:utf8 -*-
-import datetime
+from typeinfo import TypeInfo
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import sqlalchemy
+import datetime
 
-class TypeInfo(object):
-    def __init__(self,name,ftype="str",convert=str):
-        self.name=name
-        self.dname=convert(name)
-        self.ftype=ftype
-    def get_name(self):
-        return self.dname
-    def get_type(self):
-        return self.ftype
+
 
 class Common(object):
+    commit_count=500
     @classmethod
     def sync_table(cls,sconfig,tconfig):
         sconn = sconfig["conn"]
@@ -35,8 +29,7 @@ class Common(object):
                 ,stable.get_name()
                 ,swhere or ""
                 ,cls._get_multi_fields(skeys))
-        print "---- 1 ----"
-        print ssql
+        print "---- source ----"
         sdata=sconn.execute(ssql).fetchall()
         print len(sdata)
         # get target data
@@ -44,8 +37,7 @@ class Common(object):
                 ,ttable.get_name()
                 ,twhere or ""
                 ,cls._get_multi_fields(tkeys))
-        print "---- 2 ----"
-        print tsql
+        print "---- target ----"
         tdata=tconn.execute(tsql).fetchall()
         print len(tdata)
         # after order
@@ -62,7 +54,7 @@ class Common(object):
         update_params_list=[]
         insert_params_list=[]
         delete_params_list=[]
-        c_count=500
+        c_count=cls.commit_count
         update_index=0
         insert_index=0
         delete_index=0
@@ -102,6 +94,7 @@ class Common(object):
                     if update_index >= c_count:
                         update_index-=c_count
                         tconn.execute(update_sql,update_params_list)
+                        tconn.commit()
                         update_params_list=[]
                 si+=1
                 ti+=1
@@ -114,6 +107,7 @@ class Common(object):
                 if insert_index >= c_count:
                     insert_index-=c_count
                     tconn.execute(insert_sql,insert_params_list)
+                    tconn.commit()
                     insert_params_list=[]
                 si+=1
             else:
@@ -124,7 +118,8 @@ class Common(object):
                 delete_index+=1
                 if delete_index >= c_count:
                     delete_index-=c_count
-                    sconn.execute(delete_sql,delete_params_list)
+                    tconn.execute(delete_sql,delete_params_list)
+                    tconn.commit()
                     delete_params_list=[]
                 ti+=1
         while si < sl:
@@ -138,6 +133,7 @@ class Common(object):
             if insert_index >= c_count:
                 insert_index-=c_count
                 tconn.execute(insert_sql,insert_params_list)
+                tconn.commit()
                 insert_params_list=[]
             si+=1
         while ti < tl:
@@ -151,6 +147,7 @@ class Common(object):
             if delete_index >= c_count:
                 delete_index-=c_count
                 tconn.execute(delete_sql,delete_params_list)
+                tconn.commit()
                 delete_params_list=[]
             ti+=1
         if update_params_list:
@@ -184,7 +181,7 @@ class Common(object):
             skey=sfields[i]
             tkey=tfields[i]
             svalue=srow[skey.name]
-            middle_value=cls._get_value(svalue,skey.get_type(),tkey.get_type())
+            middle_value=TypeInfo._get_value(svalue,skey.get_type(),tkey.get_type())
             pkey="pf{0}".format(i)
             params[pkey]=middle_value
             if type(update_sql) == type(None):
@@ -233,7 +230,7 @@ class Common(object):
             skey=sfields[i]
             tkey=tfields[i]
             svalue=srow[skey.name]
-            middle_value=cls._get_value(svalue,skey.get_type(),tkey.get_type())
+            middle_value=TypeInfo._get_value(svalue,skey.get_type(),tkey.get_type())
             pkey="pf{0}".format(i)
             params[pkey]=middle_value
             if type(insert_sql) == type(None):
@@ -295,40 +292,13 @@ class Common(object):
 
     @classmethod
     def _compare_value(cls,svalue,stype,tvalue,ttype,get_value=None):
-        sv,tv=cls._get_middle_value(svalue,stype,tvalue,ttype,get_value=get_value)
+        sv,tv=TypeInfo._get_middle_value(svalue,stype,tvalue,ttype,get_value=get_value)
         if sv==tv:
             return 0
         if sv < tv:
             return -1
         if sv > tv:
             return 1
-
-    @classmethod
-    def _get_middle_value(cls,svalue,stype,tvalue,ttype,get_value=None):
-        base_type=cls._get_base_type(stype,ttype)
-        get_value= get_value or cls._get_value
-        return (get_value(svalue,stype,base_type)
-                ,get_value(tvalue,ttype,base_type))
-
-    @classmethod
-    def _get_base_type2(cls,stype,ttype):
-        base_type=None
-        if stype==ttype:
-            base_type=stype
-        elif stype=="str" and ttype=="num" or \
-            ttype=="num" and stype=="str":
-            base_type="num"
-        elif stype=="num" and ttype=="date" or \
-            ttype=="date" and stype=="num":
-            base_type="date"
-        elif stype=="str" or ttype=="str":
-            base_type="str"
-        return base_type
-
-    @classmethod
-    def _get_base_type(cls,stype,ttype):
-        return ttype
-
 
     @classmethod
     def _get_value(cls,value,form_type,to_type):
