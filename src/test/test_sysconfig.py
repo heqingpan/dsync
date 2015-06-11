@@ -6,7 +6,7 @@ _dir=os.path.realpath(os.path.dirname(__file__))
 _basedir=os.path.dirname(_dir)
 sys.path.append(_basedir)
 
-from dsync import synchor_tabel
+from dsync import synchor
 from dsync.typeinfo import TypeInfo
 
 from sqlalchemy import create_engine
@@ -55,7 +55,7 @@ def build_config():
 
 def test_00():
     sconfig,tconfig = build_config()
-    synchor_tabel.Common.sync_table(sconfig,tconfig)
+    synchor.Core.sync_table(sconfig,tconfig)
 
 def main():
     test_00()

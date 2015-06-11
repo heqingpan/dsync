@@ -6,7 +6,7 @@ import sqlalchemy
 
 
 
-class Common(object):
+class Core(object):
     commit_count=500
     @classmethod
     def sync_table(cls,sconfig,tconfig):
