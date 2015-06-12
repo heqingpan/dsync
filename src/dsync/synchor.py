@@ -1,13 +1,33 @@
 # -*- coding:utf8 -*-
 from typeinfo import TypeInfo
+from builder import Builder
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import sqlalchemy
+try:
+    import simplejson as json
+except:
+    import json
+import time
+import os
+
 
 
 
 class Core(object):
     commit_count=500
+    @classmethod
+    def sysc_by_file(cls,filename,is_echo=False):
+        filepath=os.path.realpath(filename)
+        fobj=open(filepath)
+        ftxt=fobj.read()
+        fobj.close()
+        return cls.sync_by_json(ftxt,is_echo=is_echo)
+    @classmethod
+    def sync_by_json(cls,text,is_echo=False):
+        config = json.loads(text)
+        group=Builder.build(config)
+        return cls.sync_group(group,is_echo=is_echo)
     @classmethod
     def sync_group(cls,group,is_echo=False):
         rlist=[]
@@ -20,6 +40,7 @@ class Core(object):
 
     @classmethod
     def sync_table(cls,sconfig,tconfig):
+        start_time=time.time()
         sconn = sconfig["conn"]
         stable = sconfig["table"]
         skeys = sconfig["keys"]
@@ -167,6 +188,7 @@ class Core(object):
             tconn.execute(insert_sql,insert_params_list)
         if delete_params_list:
             tconn.execute(delete_sql,delete_params_list)
+        end_time=time.time()
         return {
             "source_table":stable.get_name(),
             "target_table":ttable.get_name(),
@@ -176,6 +198,7 @@ class Core(object):
             "delete_count":delete_count,
             "update_count":update_count,
             "equal_count":equal_count,
+            "spend_time":end_time-start_time,
             }
 
     @classmethod
@@ -304,6 +327,7 @@ class Core(object):
         print "source_table: %s"%result["source_table"]
         print "target_table: %s"%result["target_table"]
         print "------------"
+        print "spend_time: %f"%result["spend_time"]
         print "source_count: %d"%result["source_count"]
         print "target_count: %d"%result["target_count"]
         print "delete_count: %d"%result["delete_count"]

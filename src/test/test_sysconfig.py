@@ -98,15 +98,21 @@ def test_01():
     ]
         
 }'''
-    config=json.loads(configstr)
-    br=Builder.build(config)
+    #config=json.loads(configstr)
+    #br=Builder.build(config)
     #print br
-    rlist=synchor.Core.sync_group(br,is_echo=True)
+    #rlist=synchor.Core.sync_group(br,is_echo=True)
     #print rlist
+    synchor.Core.sync_by_json(configstr,is_echo=True)
+
+def test_02():
+    config_file=os.path.join(_dir,"test_sysconfig_config.json")
+    synchor.Core.sysc_by_file(config_file,is_echo=True)
 
 def main():
     #test_00()
-    test_01()
+    #test_01()
+    test_02()
 
 
 if __name__=="__main__":
