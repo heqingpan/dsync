@@ -68,6 +68,8 @@ class Builder(object):
 
     @classmethod
     def default_conn_info(cls,**kwarg):
+        #使用默认的charset
+        kwarg.setdefault("charset",None)
         return mysql_conn_info(**kwarg)[0],str
 
     @classmethod

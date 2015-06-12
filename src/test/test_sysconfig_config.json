@@ -1,0 +1,36 @@
+{
+    "sconn":{
+        "type":"mysql",
+        "host":"127.0.0.1",
+        "port":"3306",
+        "dbname":"bigagio",
+        "user":"admin",
+        "password":"admin",
+        "charset":"utf8"
+    },
+    "tconn":{
+        "type":"mysql",
+        "host":"127.0.0.1",
+        "port":"3306",
+        "dbname":"test01",
+        "user":"admin",
+        "password":"admin",
+        "charset":"utf8"
+    },
+    "group":[
+        [
+            {
+                "table":"TB_SYSCONFIG",
+                "keys":[["ID","str"]],
+                "fields":[["ID","str"],["SYSKEY","str"],["NAME","str"],["VALUE","str"]],
+                "where":""
+            },
+            {
+                "table":"TB_SYSCONFIG",
+                "keys":[["ID","str"]],
+                "fields":[["ID","str"],["SYSKEY","str"],["NAME","str"],["VALUE","str"]],
+                "where":""
+            }
+        ]
+    ]
+}
