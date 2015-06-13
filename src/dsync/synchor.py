@@ -12,8 +12,6 @@ import time
 import os
 
 
-
-
 class Core(object):
     commit_count=500
     @classmethod
