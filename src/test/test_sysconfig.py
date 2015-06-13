@@ -9,6 +9,7 @@ sys.path.append(_basedir)
 from dsync import synchor
 from dsync.typeinfo import TypeInfo
 from dsync.builder import Builder
+from dsync.generator import Generator
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -109,10 +110,26 @@ def test_02():
     config_file=os.path.join(_dir,"test_sysconfig_config.json")
     synchor.Core.sysc_by_file(config_file,is_echo=True)
 
+def test_03():
+    config_file=os.path.join(_dir,"test_sysconfig_config.json")
+    fobj=open(config_file)
+    config=json.load(fobj)
+    fobj.close()
+    sconnconfig=config["sconn"]
+    tconnconfig=config["tconn"]
+    out_file=os.path.join(_dir,"test_sysconfig_config.out")
+    Generator.gene_config_to_file(sconnconfig,tconnconfig,out_file)
+
+def test_04():
+    config_file=os.path.join(_dir,"test_sysconfig_config.out")
+    synchor.Core.sysc_by_file(config_file,is_echo=True)
+
 def main():
     #test_00()
     #test_01()
-    test_02()
+    #test_02()
+    test_03()
+    #test_04()
 
 
 if __name__=="__main__":
