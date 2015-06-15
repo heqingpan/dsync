@@ -1,9 +1,11 @@
 # -*- coding:utf8 -*-
 
-from typeinfo import TypeInfo
+from .typeinfo import TypeInfo
 import sqlalchemy
+import re
 
 class Builder(object):
+    dbtype_reg=re.compile("^(\w)+[\w\W]*$")
     @classmethod
     def build(cls,config):
         sconnconfig=config["sconn"]
@@ -59,9 +61,9 @@ class Builder(object):
     def build_conn_info(cls,database_type,**kwarg):
         if database_type=="mysql":
             return cls.mysql_conn_info(**kwarg)
-        connstr=kwarg and kwarg.get("connstr",None)
         if database_type=="sqlite":
             return cls.sqlite_conn_info(**kwarg)
+        connstr=kwarg and kwarg.get("connstr",None)
         if connstr:
             return sqlalchemy.create_engine(connstr),str
         return cls.default_conn_info(**kwarg)
@@ -74,6 +76,7 @@ class Builder(object):
 
     @classmethod
     def mysql_conn_info(cls,**kwarg):
+        database_type="mysql"
         host=kwarg.get("host","127.0.0.1")
         port=kwarg.get("port","3306")
         dbname=kwarg.get("dbname","test")
@@ -87,16 +90,23 @@ class Builder(object):
                 ,dbname)
         if charset:
             connstr = connstr + "?charset=" + charset
-        return sqlalchemy.create_engine(connstr),(lambda a:'`%s`'%a)
+        return sqlalchemy.create_engine(connstr),TypeInfo.get_field_convert(database_type)
 
     @classmethod
     def sqlite_conn_info(cls,**kwarg):
+        database_type="sqlite"
         connstr="sqlite:///:memory:"
         path=kwarg.get("path",None)
         if path:
             path = os.path.realpath(path)
             connstr="sqlite://"+path
-        return sqlalchemy.create_engine(connstr),str 
+        return sqlalchemy.create_engine(connstr),TypeInfo.get_field_convert(database_type)
+
+    @classmethod
+    def path_conn_info(cls,connstr):
+        m=cls.dbtype_reg.match(connstr)
+        database_type=m.group(1).lower()
+        return sqlalchemy.create_engine(connstr),TypeInfo.get_field_convert(database_type)
 
 
 

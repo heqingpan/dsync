@@ -1,6 +1,6 @@
 # -*- coding:utf8 -*-
-from typeinfo import TypeInfo
-from builder import Builder
+from .typeinfo import TypeInfo
+from .builder import Builder
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import sqlalchemy
@@ -21,6 +21,14 @@ class Core(object):
         ftxt=fobj.read()
         fobj.close()
         return cls.sync_by_json(ftxt,is_echo=is_echo)
+    @classmethod
+    def sysc_by_path(cls,sconnstr,tconnstr,is_echo=False):
+        from .generator import Generator
+        sinfo={"connstr":sconnstr}
+        tinfo={"connstr":tconnstr}
+        config = Generator.gene_config(sinfo,tinfo)
+        group=Builder.build(config)
+        return cls.sync_group(group,is_echo=is_echo)
     @classmethod
     def sync_by_json(cls,text,is_echo=False):
         config = json.loads(text)

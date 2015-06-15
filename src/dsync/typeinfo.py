@@ -55,3 +55,9 @@ class TypeInfo(object):
         if sv > tv:
             return 1
 
+    @classmethod
+    def get_field_convert(cls,dbtype):
+        if dbtype=="mysql":
+            return (lambda a:'`%s`'%a)
+        return str
+
