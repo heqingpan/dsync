@@ -11,7 +11,7 @@ class Generator(object):
     @classmethod
     def get_tables(cls,conn):
         tables=conn.table_names()
-        return map(unicode.upper,tables)
+        return map(str,tables)
 
     @classmethod
     def get_columns(cls,conn,table,meta=None):
@@ -108,13 +108,16 @@ class Generator(object):
         ttlist=cls.get_tables(tconn)
         tdict={}
         for item in ttlist:
-            tdict[item]=item
+            kitem=item.upper()
+            tdict[kitem]=item
         slist=[]
         mlist=[]
         for sitem in stlist:
-            if tdict.has_key(sitem):
-                mlist.append(sitem)
-                tdict.pop(sitem)
+            kitem=sitem.upper()
+            titem=tdict.get(kitem,None)
+            if titem:
+                mlist.append((sitem,titem))
+                tdict.pop(kitem)
             else:
                 slist.append(sitem)
         tlist=tdict.values()
@@ -131,8 +134,8 @@ class Generator(object):
         smeta = sqlalchemy.MetaData(sconn)
         tmeta = sqlalchemy.MetaData(tconn)
         group = [] 
-        for table in match_tables["match"]:
-            group.append(cls.gene_one_table_config(sconn,table,tconn,table,smeta=smeta,tmeta=tmeta))
+        for stable,ttable in match_tables["match"]:
+            group.append(cls.gene_one_table_config(sconn,stable,tconn,ttable,smeta=smeta,tmeta=tmeta))
         return group
 
     @classmethod
