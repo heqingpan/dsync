@@ -10,6 +10,7 @@ except:
     import json
 import time
 import os
+import traceback
 
 
 class Core(object):
@@ -38,10 +39,13 @@ class Core(object):
     def sync_group(cls,group,is_echo=False):
         rlist=[]
         for item in group:
-            r=cls.sync_table(item[0],item[1])
-            if is_echo:
-                cls._print_result(r)
-            rlist.append(r)
+            try:
+                r=cls.sync_table(item[0],item[1])
+                if is_echo:
+                    cls._print_result(r)
+                rlist.append(r)
+            except:
+                print traceback.format_exc()
         return rlist
 
     @classmethod
@@ -49,28 +53,37 @@ class Core(object):
         start_time=time.time()
         sconn = sconfig["conn"]
         stable = sconfig["table"]
-        skeys = sconfig["keys"]
         swhere = sconfig["where"]
         sfields = sconfig["fields"]
+        skeys = sconfig["keys"] or sfields
 
         tconn = tconfig["conn"]
         ttable = tconfig["table"]
-        tkeys = tconfig["keys"]
         twhere = tconfig["where"]
         tfields = tconfig["fields"]
+        tkeys = tconfig["keys"] or tfields
 
-        sqlfmt="select {0} from {1} where 1=1 {2} order by {3}"
+        sqlfmt="select {0} from {1} where 1=1 {2} {3}"
+        orderfmt = " order by {0} "
         # get source data
+        sorder=""
+        if skeys:
+            sorder=orderfmt.format(cls._get_multi_fields(skeys))
         ssql = sqlfmt.format(cls._get_multi_fields(sfields)
                 ,stable.get_name()
                 ,swhere or ""
-                ,cls._get_multi_fields(skeys))
+                ,sorder)
+        print ssql
         sdata=sconn.execute(ssql).fetchall()
         # get target data
+        torder=""
+        if tkeys:
+            torder=orderfmt.format(cls._get_multi_fields(tkeys))
         tsql = sqlfmt.format(cls._get_multi_fields(tfields)
                 ,ttable.get_name()
                 ,twhere or ""
-                ,cls._get_multi_fields(tkeys))
+                ,torder)
+        print tsql
         tdata=tconn.execute(tsql).fetchall()
         # after order
 
@@ -211,13 +224,13 @@ class Core(object):
     def _take_update(cls,sconfig,tconfig,srow,trow,update_sql=None):
         sconn = sconfig["conn"]
         stable = sconfig["table"]
-        skeys = sconfig["keys"]
         sfields = sconfig["fields"]
+        skeys = sconfig["keys"] or sfields
 
         tconn = tconfig["conn"]
         ttable = tconfig["table"]
-        tkeys = tconfig["keys"]
         tfields = tconfig["fields"]
+        tkeys = tconfig["keys"] or tfields
         kl=len(skeys)
         fl=len(sfields)
 
@@ -256,13 +269,13 @@ class Core(object):
     def _take_insert(cls,sconfig,tconfig,srow,trow,insert_sql=None):
         sconn = sconfig["conn"]
         stable = sconfig["table"]
-        skeys = sconfig["keys"]
         sfields = sconfig["fields"]
+        skeys = sconfig["keys"] or sfields
 
         tconn = tconfig["conn"]
         ttable = tconfig["table"]
-        tkeys = tconfig["keys"]
         tfields = tconfig["fields"]
+        tkeys = tconfig["keys"] or tfields
         kl=len(skeys)
         fl=len(sfields)
 
@@ -293,13 +306,13 @@ class Core(object):
     def _take_delete(cls,sconfig,tconfig,srow,trow,delete_sql=None):
         sconn = sconfig["conn"]
         stable = sconfig["table"]
-        skeys = sconfig["keys"]
         sfields = sconfig["fields"]
+        skeys = sconfig["keys"] or sfields
 
         tconn = tconfig["conn"]
         ttable = tconfig["table"]
-        tkeys = tconfig["keys"]
         tfields = tconfig["fields"]
+        tkeys = tconfig["keys"] or tfields
         kl=len(skeys)
         fl=len(sfields)
 
