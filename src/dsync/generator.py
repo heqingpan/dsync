@@ -1,6 +1,6 @@
 # -*- coding:utf8 -*-
 
-from builder import Builder
+from .builder import Builder
 import sqlalchemy
 try:
     import simplejson as json
@@ -148,11 +148,33 @@ class Generator(object):
 
     @classmethod
     def _build_generate_conn(cls,connconfig):
-        from builder import Builder
+        from .builder import Builder
         conninfo={}
         conninfo.update(connconfig)
+        connstr=conninfo.get("connstr",None)
+        if connstr:
+            return cls._build_path_generate_conn(connstr)
         conninfo["charset"]=None
         conn=Builder.build_conn(conninfo)[0]
+        return conn
+
+    @classmethod
+    def _build_path_generate_conn(cls,connstr):
+        from .builder import Builder
+        import urlparse
+        import urllib
+        t=connstr.split("?")
+        if len(t)==2:
+            path=t[0]
+            query=t[1].lower()
+            ql=urlparse.parse_qsl(query)
+            rql=[]
+            for item in ql:
+                if item[0]!="charset":
+                    rql.append(item)
+            query=urllib.urlencode(rql)
+            connstr="{0}?{1}".format(path,query)
+        conn=Builder.path_conn_info(connstr)[0]
         return conn
 
 

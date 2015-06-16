@@ -124,12 +124,18 @@ def test_04():
     config_file=os.path.join(_dir,"test_sysconfig_config.out")
     synchor.Core.sysc_by_file(config_file,is_echo=True)
 
+def test_05():
+    sconnstr=r"mysql+mysqldb://admin:admin@127.0.0.1:3306/bigagio?charset=utf8"
+    tconnstr=r"mysql+mysqldb://admin:admin@127.0.0.1:3306/test01?charset=utf8"
+    synchor.Core.sysc_by_path(sconnstr,tconnstr,is_echo=True)
+
 def main():
     #test_00()
     #test_01()
     #test_02()
-    test_03()
+    #test_03()
     #test_04()
+    test_05()
 
 
 if __name__=="__main__":
