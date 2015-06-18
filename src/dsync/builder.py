@@ -5,7 +5,7 @@ import sqlalchemy
 import re
 
 class Builder(object):
-    dbtype_reg=re.compile("^(\w)+[\w\W]*$")
+    dbtype_reg=re.compile("^(\w+)[\w\W]*$")
     @classmethod
     def build(cls,config):
         sconnconfig=config["sconn"]
@@ -65,7 +65,7 @@ class Builder(object):
             return cls.sqlite_conn_info(**kwarg)
         connstr=kwarg and kwarg.get("connstr",None)
         if connstr:
-            return sqlalchemy.create_engine(connstr),str
+            return cls.path_conn_info(connstr)
         return cls.default_conn_info(**kwarg)
 
     @classmethod
