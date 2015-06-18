@@ -73,7 +73,6 @@ class Core(object):
                 ,stable.get_name()
                 ,swhere or ""
                 ,sorder)
-        print ssql
         sdata=sconn.execute(ssql).fetchall()
         # get target data
         torder=""
@@ -83,7 +82,6 @@ class Core(object):
                 ,ttable.get_name()
                 ,twhere or ""
                 ,torder)
-        print tsql
         tdata=tconn.execute(tsql).fetchall()
         # after order
 
