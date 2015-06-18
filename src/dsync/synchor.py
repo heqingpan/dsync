@@ -352,3 +352,15 @@ class Core(object):
         print "insert_count: %d"%result["insert_count"]
         print "equal_count: %d"%result["equal_count"]
             
+
+def test():
+    import sys
+    args=sys.argv[1:]
+    if len(args) >=2:
+        sc=args[0]
+        tc=args[1]
+        Core.sysc_by_path(sc,tc,is_echo=True)
+
+if __name__=="__main__":
+    test()
+
