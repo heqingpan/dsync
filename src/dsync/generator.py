@@ -21,22 +21,22 @@ class Generator(object):
         cols=[]
         keys=[]
         for item in col_list:
-            obj=[None,None]
-            obj[0]=item.name.upper()
+            obj={}
+            obj["name"]=item.name.upper()
             item_type=item.type
             if isinstance(item_type,sqlalchemy.types.Integer) \
                 or isinstance(item_type,sqlalchemy.types.Numeric):
-                obj[1]="num"
+                obj["type"]="num"
             elif isinstance(item_type,sqlalchemy.types.DateTime) \
                 or isinstance(item_type,sqlalchemy.types.Date):
-                obj[1]="date"
+                obj["type"]="date"
             else:
-                obj[1]="str"
+                obj["type"]="str"
             cols.append(obj)
             if item.primary_key:
                 keys.append(obj)
-        cols.sort(key=lambda a:a[0])
-        keys.sort(key=lambda a:a[0])
+        cols.sort(key=lambda a:a["name"])
+        keys.sort(key=lambda a:a["name"])
         return cols,keys
 
     @classmethod
@@ -58,18 +58,18 @@ class Generator(object):
     def _match_fields(cls,sflist,tflist):
         tdict={}
         for item in tflist:
-            tdict[item[0]]=item
+            tdict[item["name"]]=item
         slist=[]
         mlist=[]
         for sitem in sflist:
-            titem=tdict.get(sitem[0],None)
+            titem=tdict.get(sitem["name"],None)
             if titem:
                 mlist.append([sitem,titem])
-                tdict.pop(sitem[0])
+                tdict.pop(sitem["name"])
             else:
                 slist.append(sitem)
         tlist=tdict.values()
-        tlist.sort(key=lambda a:a[0])
+        tlist.sort(key=lambda a:a["name"])
         return {
             "source_remain":slist,
             "match":mlist,

@@ -42,12 +42,12 @@ class Builder(object):
         config["table"]=TypeInfo(info["table"],convert=convert)
         keys=[]
         for key in info["keys"]:
-            keys.append(TypeInfo(key[0],key[1]
+            keys.append(TypeInfo(key["name"],key["type"]
                 ,convert=convert))
         config["keys"]=keys
         fields=[]
         for field in info["fields"]:
-            fields.append(TypeInfo(field[0],field[1]
+            fields.append(TypeInfo(field["name"],field["type"]
                 ,convert=convert))
         config["fields"]=fields
         config["where"]=info["where"]
