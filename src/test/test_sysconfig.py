@@ -85,14 +85,24 @@ def test_01():
         [
             {
                 "table":"TB_SYSCONFIG",
-                "keys":[["ID","str"]],
-                "fields":[["ID","str"],["SYSKEY","str"],["NAME","str"],["VALUE","str"]],
+                "keys":[{"name":"ID","type":"str"}],
+                "fields":[
+                    {"name":"ID","type":"str"},
+                    {"name":"SYSKEY","type":"str"},
+                    {"name":"NAME","type":"str"},
+                    {"name":"VALUE","type":"str"}
+                ],
                 "where":""
             },
             {
                 "table":"TB_SYSCONFIG",
-                "keys":[["ID","str"]],
-                "fields":[["ID","str"],["SYSKEY","str"],["NAME","str"],["VALUE","str"]],
+                "keys":[{"name":"ID","type":"str"}],
+                "fields":[
+                    {"name":"ID","type":"str"},
+                    {"name":"SYSKEY","type":"str"},
+                    {"name":"NAME","type":"str"},
+                    {"name":"VALUE","type":"str"}
+                ],
                 "where":""
             }
         ]
