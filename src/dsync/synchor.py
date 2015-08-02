@@ -14,7 +14,7 @@ import traceback
 
 
 class Core(object):
-    commit_count=500
+    commit_count=100
     @classmethod
     def sysc_by_file(cls,filename,is_echo=False):
         filepath=os.path.realpath(filename)
