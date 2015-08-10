@@ -352,6 +352,51 @@ class Core(object):
         print "insert_count: %d"%result["insert_count"]
         print "equal_count: %d"%result["equal_count"]
             
+class Diff(object):
+    @classmethod
+    def diff_by_path(cls,sconnstr,tconnstr):
+        from .generator import DiffGenerator
+        diff_result = DiffGenerator.gene_diff_tables_by_path(sconnstr,tconnstr)
+        cls._print_diff_result(diff_result)
+
+    @classmethod
+    def _print_diff_result(cls,result):
+        print "-"*20
+        print "source_remain:"
+        for item in result["source_remain"]:
+            print item
+        print "-"*20
+        print "target_remain:"
+        for item in result["target_remain"]:
+            print item
+        print "-"*20
+        print "diff_tables:"
+        for item in result["diff_tables"]:
+            print "-"*10
+            print "stable:"
+            print item["stable"]
+            print "ttable:"
+            print item["ttable"]
+            print "-"*5
+            print "col_source_remain:"
+            cls._print_cols(item["col_source_remain"])
+            print "-"*5
+            print "col_target_remain:"
+            cls._print_cols(item["col_target_remain"])
+            print "-"*5
+            print "key_source_remain:"
+            cls._print_cols(item["key_source_remain"])
+            print "-"*5
+            print "key_target_remain:"
+            cls._print_cols(item["key_target_remain"])
+            print ""
+    @classmethod
+    def _print_cols(cls,cols):
+        for col in cols:
+            print " >name:\t",col["name"]
+            print "  type:\t",col["type"]
+            print "  length:\t",col.get("length",0)
+
 
 def test():
     import sys

@@ -16,8 +16,8 @@ simple start:
 KEYWORDS = "data synchor tool,support multi database like mysql sqlite"
 AUTHOR = "heqingpan"
 AUTHOR_EMAIL = "heqingpan@126.com"
-URL = "https://github.com/heqingpan/datasynchro"
-VERSION = "0.1.0"
+URL = "https://github.com/heqingpan/dsync"
+VERSION = "0.2.1"
 LICENSE = "MIT"
  
 setup(
