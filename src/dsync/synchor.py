@@ -400,11 +400,30 @@ class Diff(object):
 
 def test():
     import sys
-    args=sys.argv[1:]
-    if len(args) >=2:
+    import getopt
+    opts,args=getopt.getopt(sys.argv[1:],"ht:",["help","type="])
+    help_str="""help:
+[option] args
+option:
+-t type source_connstring target_connstring ,type value of ["sycn","diff"]
+"""
+    type_ = "sycn"
+    for key,val in opts:
+        if key=="-t" or key=="--type":
+            type_=val
+
+    if type_=="sycn" and len(args) >=2:
         sc=args[0]
         tc=args[1]
         Core.sysc_by_path(sc,tc,is_echo=True)
+        return
+    if type_=="diff" and len(args) >=2:
+        sc=args[0]
+        tc=args[1]
+        Diff.diff_by_path(sc,tc)
+        return
+
+    print help_str
 
 if __name__=="__main__":
     test()
