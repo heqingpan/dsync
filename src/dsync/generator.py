@@ -32,6 +32,7 @@ class Generator(object):
                 obj["type"]="date"
             else:
                 obj["type"]="str"
+            obj["length"]=item_type.__dict__.get("length",0) or item_type.__dict__.get("display_width",0)
             cols.append(obj)
             if item.primary_key:
                 keys.append(obj)
@@ -40,11 +41,11 @@ class Generator(object):
         return cols,keys
 
     @classmethod
-    def match_one_table(cls,sconn,stable,tconn,ttable,smeta=None,tmeta=None):
+    def match_one_table(cls,sconn,stable,tconn,ttable,smeta=None,tmeta=None,check_length=0):
         scollist,skeylist=cls.get_columns(sconn,stable,meta=smeta)
         tcollist,tkeylist=cls.get_columns(tconn,ttable,meta=tmeta)
-        col_match=cls._match_fields(scollist,tcollist)
-        key_match=cls._match_fields(skeylist,tkeylist)
+        col_match=cls._match_fields(scollist,tcollist,check_length=check_length)
+        key_match=cls._match_fields(skeylist,tkeylist,check_length=check_length)
         return {
             "col_source_remain":col_match["source_remain"],
             "col_match":col_match["match"],
@@ -55,7 +56,7 @@ class Generator(object):
         }
         
     @classmethod
-    def _match_fields(cls,sflist,tflist):
+    def _match_fields(cls,sflist,tflist,check_length=0):
         tdict={}
         for item in tflist:
             tdict[item["name"]]=item
@@ -64,6 +65,10 @@ class Generator(object):
         for sitem in sflist:
             titem=tdict.get(sitem["name"],None)
             if titem:
+                if check_length and \
+                        sitem.get("length",0) != titem.get("length",0):
+                    slist.append(sitem)
+                    continue
                 mlist.append([sitem,titem])
                 tdict.pop(sitem["name"])
             else:
@@ -187,7 +192,54 @@ class Generator(object):
         with open(filename,'w') as f:
             json.dump(config,f,indent=2)
 
+    @classmethod
+    def get_path_connconfig(cls,path):
+        return {
+            "connstr":path
+        }
 
+
+class DiffGenerator(Generator):
+    @classmethod
+    def gene_diff_tables(cls,sconn,tconn,check_length=1):
+        match_info = cls.match_tables(sconn,tconn)
+        smeta = sqlalchemy.MetaData(sconn)
+        tmeta = sqlalchemy.MetaData(tconn)
+        group = []
+        for stable,ttable in match_info["match"]:
+            item=cls.get_table_diff_info(sconn,stable,tconn,ttable,smeta=smeta,tmeta=tmeta,check_length=check_length)
+            if item:
+                obj={}
+                obj.update(item)
+                obj["stable"]=stable
+                obj["ttable"]=ttable
+                group.append(obj)
+        result ={}
+        result["source_remain"]=match_info["source_remain"]
+        result["target_remain"]=match_info["target_remain"]
+        result["diff_tables"]=group
+        return result
+
+    @classmethod
+    def get_table_diff_info(cls,sconn,stable,tconn,ttable,smeta=None,tmeta=None,check_length=0):
+        match_info=cls.match_one_table(sconn,stable,tconn,ttable,smeta=smeta,tmeta=tmeta,check_length=check_length)
+        if match_info["col_source_remain"] or \
+            match_info["col_target_remain"] or \
+            match_info["key_source_remain"] or \
+            match_info["key_target_remain"]:
+                obj={}
+                obj["col_source_remain"]=match_info["col_source_remain"]
+                obj["col_target_remain"]=match_info["col_target_remain"]
+                obj["key_source_remain"]=match_info["key_source_remain"]
+                obj["key_target_remain"]=match_info["key_target_remain"]
+                return obj
+        return None
+
+    @classmethod
+    def gene_diff_tables_by_path(cls,spath,tpath,check_length=1):
+        sconn = cls._build_path_generate_conn(spath)
+        tconn = cls._build_path_generate_conn(tpath)
+        return cls.gene_diff_tables(sconn,tconn,check_length=check_length)
 
 
 

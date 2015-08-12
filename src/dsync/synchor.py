@@ -352,14 +352,78 @@ class Core(object):
         print "insert_count: %d"%result["insert_count"]
         print "equal_count: %d"%result["equal_count"]
             
+class Diff(object):
+    @classmethod
+    def diff_by_path(cls,sconnstr,tconnstr):
+        from .generator import DiffGenerator
+        diff_result = DiffGenerator.gene_diff_tables_by_path(sconnstr,tconnstr)
+        cls._print_diff_result(diff_result)
+
+    @classmethod
+    def _print_diff_result(cls,result):
+        print "-"*20
+        print "source_remain:"
+        for item in result["source_remain"]:
+            print item
+        print "-"*20
+        print "target_remain:"
+        for item in result["target_remain"]:
+            print item
+        print "-"*20
+        print "diff_tables:"
+        for item in result["diff_tables"]:
+            print "-"*10
+            print "stable:"
+            print item["stable"]
+            print "ttable:"
+            print item["ttable"]
+            print "-"*5
+            print "col_source_remain:"
+            cls._print_cols(item["col_source_remain"])
+            print "-"*5
+            print "col_target_remain:"
+            cls._print_cols(item["col_target_remain"])
+            print "-"*5
+            print "key_source_remain:"
+            cls._print_cols(item["key_source_remain"])
+            print "-"*5
+            print "key_target_remain:"
+            cls._print_cols(item["key_target_remain"])
+            print ""
+    @classmethod
+    def _print_cols(cls,cols):
+        for col in cols:
+            print " >name:\t",col["name"]
+            print "  type:\t",col["type"]
+            print "  length:\t",col.get("length",0)
+
 
 def test():
     import sys
-    args=sys.argv[1:]
-    if len(args) >=2:
+    import getopt
+    opts,args=getopt.getopt(sys.argv[1:],"ht:",["help","type="])
+    help_str="""help:
+[option] args
+option:
+-t type source_connstring target_connstring ,type value of ["sycn","diff"]
+"""
+    type_ = "sycn"
+    for key,val in opts:
+        if key=="-t" or key=="--type":
+            type_=val
+
+    if type_=="sycn" and len(args) >=2:
         sc=args[0]
         tc=args[1]
         Core.sysc_by_path(sc,tc,is_echo=True)
+        return
+    if type_=="diff" and len(args) >=2:
+        sc=args[0]
+        tc=args[1]
+        Diff.diff_by_path(sc,tc)
+        return
+
+    print help_str
 
 if __name__=="__main__":
     test()
