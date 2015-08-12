@@ -405,22 +405,40 @@ def test():
     help_str="""help:
 [option] args
 option:
--t type source_connstring target_connstring ,type value of ["sycn","diff"]
+-t sync source_connstring target_connstring
+-t sync config_file
+-t diff source_connstring target_connstring
+-t gene source_connstring target_connstring out_file
 """
-    type_ = "sycn"
+    type_ = "sync"
     for key,val in opts:
         if key=="-t" or key=="--type":
             type_=val
 
-    if type_=="sycn" and len(args) >=2:
-        sc=args[0]
-        tc=args[1]
-        Core.sysc_by_path(sc,tc,is_echo=True)
-        return
+    if type_=="sync":
+        if len(args) >=2:
+            sc=args[0]
+            tc=args[1]
+            Core.sysc_by_path(sc,tc,is_echo=True)
+            return
+        if len(args) == 1:
+            config_file=args[0]
+            Core.sysc_by_file(config_file,is_echo=True)
+            return
     if type_=="diff" and len(args) >=2:
         sc=args[0]
         tc=args[1]
         Diff.diff_by_path(sc,tc)
+        return
+
+    if type_=="gene" and len(args) >=3:
+        sc=args[0]
+        tc=args[1]
+        ofile=args[2]
+        from .generator import Generator
+        sinfo={"connstr":sc}
+        tinfo={"connstr":tc}
+        Generator.gene_config_to_file(sinfo,tinfo,ofile)
         return
 
     print help_str
